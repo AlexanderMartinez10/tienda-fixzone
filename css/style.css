@@ -1,0 +1,85 @@
+:root {
+    --neon-pink: #ff00cc;
+    --deep-black: #0a0a0a;
+    --glass-bg: rgba(255, 255, 255, 0.02);
+    --border-soft: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--deep-black);
+    color: #f1f1f1;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-heading {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.02em;
+}
+
+/* Professional Neon Utilities */
+.neon-accent {
+    color: var(--neon-pink);
+    text-shadow: 0 0 15px rgba(255, 0, 204, 0.3);
+}
+
+.neon-border-thin {
+    border: 1px solid rgba(255, 0, 204, 0.3);
+    box-shadow: 0 0 10px rgba(255, 0, 204, 0.1);
+}
+
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--border-soft);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    border-color: rgba(255, 0, 204, 0.4);
+    background: rgba(255, 0, 204, 0.02);
+    transform: translateY(-5px);
+}
+
+.btn-primary {
+    background: var(--neon-pink);
+    color: white;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 0, 204, 0.3);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 8px 25px rgba(255, 0, 204, 0.5);
+    transform: scale(1.02);
+}
+
+.btn-outline {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+    background: rgba(255, 0, 204, 0.05);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--deep-black); }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--neon-pink); }
+
+/* Animation */
+@keyframes reveal {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.reveal { animation: reveal 0.8s forwards; }
