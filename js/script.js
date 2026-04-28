@@ -15,7 +15,8 @@ let state = {
     ],
     cart: [],
     activeCategory: 'ALL',
-    logoClicks: 0
+    logoClicks: 0,
+    currentProdImage: null
 };
 
 function $(id) { return document.getElementById(id); }
@@ -167,7 +168,7 @@ function renderAdmin() {
             <div class="glass-card p-5 rounded-2xl flex justify-between items-center border-white/5">
                 <span class="text-xs font-bold text-gray-400 tracking-widest uppercase">${cat.name}</span>
                 <div class="flex gap-4">
-                    <button onclick="editCategory(${cat.id})" class="text-[9px] text-pink-500 font-bold uppercase hover:tracking-widest transition-all">Editar</button>
+                    <button onclick="openCategoryForm(${cat.id})" class="text-[9px] text-pink-500 font-bold uppercase hover:tracking-widest transition-all">Editar</button>
                     <button onclick="deleteCategory(${cat.id})" class="text-[9px] text-red-700 font-bold uppercase hover:tracking-widest transition-all">Baja</button>
                 </div>
             </div>
@@ -179,12 +180,19 @@ function renderAdmin() {
         const cn = state.categories.find(c => c.id == p.categoryId)?.name || '---';
         prodList.innerHTML += `
             <tr class="hover:bg-white/[0.01] transition-all">
-                <td class="px-8 py-6 text-sm font-bold text-gray-300">${p.name}</td>
+                <td class="px-8 py-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                            ${p.image ? `<img src="${p.image}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-image text-white/10 text-xs flex items-center justify-center h-full"></i>`}
+                        </div>
+                        <span class="text-sm font-bold text-gray-300">${p.name}</span>
+                    </div>
+                </td>
                 <td class="px-8 py-6 text-[10px] text-gray-600 font-bold uppercase tracking-[0.2em]">${cn}</td>
                 <td class="px-8 py-6 font-bold text-pink-500">$${p.price.toLocaleString()}</td>
                 <td class="px-8 py-6">
                     <div class="flex gap-6">
-                        <button onclick="editProduct(${p.id})" class="text-gray-600 hover:text-pink-500 transition-colors"><i class="fa-solid fa-pen-nib"></i></button>
+                        <button onclick="openProductForm(${p.id})" class="text-gray-600 hover:text-pink-500 transition-colors"><i class="fa-solid fa-pen-nib"></i></button>
                         <button onclick="deleteProduct(${p.id})" class="text-gray-600 hover:text-red-500 transition-colors"><i class="fa-solid fa-ban"></i></button>
                     </div>
                 </td>
@@ -219,19 +227,53 @@ function openProductForm(id = null) {
     if (id) {
         const p = state.products.find(x => x.id == id);
         $('edit-prod-id').value = id; $('prod-name').value = p.name; $('prod-price').value = p.price; $('prod-cat').value = p.categoryId;
+        state.currentProdImage = p.image;
+        if (p.image) $('admin-prod-preview').innerHTML = `<img src="${p.image}" class="w-full h-full object-cover">`;
     } else {
         $('edit-prod-id').value = ''; $('prod-name').value = ''; $('prod-price').value = '';
+        state.currentProdImage = null;
+        $('admin-prod-preview').innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-2xl text-white/10"></i>`;
     }
 }
 function closeProductForm() { $('product-form-modal').classList.add('hidden'); }
 function saveProduct() {
     const n = $('prod-name').value, pr = parseFloat($('prod-price').value), ci = parseInt($('prod-cat').value), id = $('edit-prod-id').value;
     if (!n || !pr) return;
-    if (id) { const p = state.products.find(x => x.id == id); p.name = n; p.price = pr; p.categoryId = ci; } else { state.products.push({ id: Date.now(), name: n, price: pr, categoryId: ci }); }
+    if (id) { 
+        const p = state.products.find(x => x.id == id); 
+        p.name = n; p.price = pr; p.categoryId = ci; p.image = state.currentProdImage;
+    } else { 
+        state.products.push({ id: Date.now(), name: n, price: pr, categoryId: ci, image: state.currentProdImage }); 
+    }
     saveState(); renderAdmin(); closeProductForm();
 }
 function deleteProduct(id) { if (confirm("¿Eliminar registro de inventario?")) { state.products = state.products.filter(p => p.id != id); saveState(); renderAdmin(); } }
 
 function toggleMobileMenu() { $('mobile-menu').classList.toggle('hidden'); }
 
-window.onload = () => { renderStore(); updateCartUI(); }
+window.onload = () => { 
+    renderStore(); 
+    updateCartUI(); 
+
+    // Loader logic
+    setTimeout(() => {
+        const loader = $('loader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 500);
+        }
+    }, 2000);
+
+    // File handling
+    $('prod-img-input').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                state.currentProdImage = event.target.result;
+                $('admin-prod-preview').innerHTML = `<img src="${state.currentProdImage}" class="w-full h-full object-cover">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
